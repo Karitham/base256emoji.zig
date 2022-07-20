@@ -74,45 +74,37 @@ test "encode" {
 }
 
 test "encode rate" {
-    const start_t = std.time.nanoTimestamp();
     const repeat = 10000000;
 
     var i: usize = 0;
     const in = "hi juan!";
-    const out = "😴🌟😅😬🤘🤤😻👏";
     var buf: [in.len * 4]u8 = undefined;
-    var buf_out: []u8 = &buf;
 
-    while (i < repeat) : (i += 1) {
-        buf_out = try encodeBuf(in, &buf);
-    }
+    const start_t = std.time.nanoTimestamp();
+    while (i < repeat) : (i += 1) std.mem.doNotOptimizeAway(try encodeBuf(in, &buf));
     const end_t = std.time.nanoTimestamp();
 
-    try testing.expectEqualSlices(u8, out, buf_out);
-
-    const duration = @intToFloat(f64, end_t - start_t);
-    const rate = @intToFloat(f64, repeat) / (duration / std.time.ns_per_s);
-    std.debug.print("took: {} for {} iter, decode rate: {} chars per second\n", .{ std.fmt.fmtDuration(@floatToInt(u64, duration)), repeat, rate / @intToFloat(f64, in.len) });
+    std.debug.print("took: {} for {} iter. {} ns/op\n", .{
+        std.fmt.fmtDuration(@intCast(u64, end_t - start_t)),
+        repeat,
+        @intToFloat(f64, end_t - start_t) / repeat,
+    });
 }
 
 test "decode rate" {
-    const start_t = std.time.nanoTimestamp();
     const repeat = 1000000;
 
     var i: usize = 0;
     const in = "😴🌟😅😬🤘🤤😻👏";
-    const out = "hi juan!";
     var buf: [in.len * 4]u8 = undefined;
-    var buf_out: []u8 = &buf;
 
-    while (i < repeat) : (i += 1) {
-        buf_out = try decodeBuf(in, &buf);
-    }
+    const start_t = std.time.nanoTimestamp();
+    while (i < repeat) : (i += 1) std.mem.doNotOptimizeAway(try decodeBuf(in, &buf));
     const end_t = std.time.nanoTimestamp();
 
-    try testing.expectEqualSlices(u8, out, buf_out);
-
-    const duration = @intToFloat(f64, end_t - start_t);
-    const rate = @intToFloat(f64, repeat) / (duration / std.time.ns_per_s);
-    std.debug.print("took: {} for {} iter, decode rate: {} chars per second\n", .{ std.fmt.fmtDuration(@floatToInt(u64, duration)), repeat, rate / @intToFloat(f64, in.len) });
+    std.debug.print("took: {} for {} iter. {} ns/op\n", .{
+        std.fmt.fmtDuration(@intCast(u64, end_t - start_t)),
+        repeat,
+        @intToFloat(f64, end_t - start_t) / repeat,
+    });
 }
